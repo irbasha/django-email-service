@@ -5,11 +5,21 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-  Hi {{ user.username }}!
-  <p><a href="{% url 'logout' %}">logout</a></p>
-  <p><a href="{% url 'password_reset' %}">reset password</a></p>
+  <form method="POST" class="post-form" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="save btn btn-default">Send Email</button>
+  </form>
+  <p></p>
+  <p>
+    <a href="{% url 'logout' %}"><button type="submit" class="save btn btn-default">Logout</button></a>
+    <a href="{% url 'password_reset' %}"><button type="submit" class="save btn btn-default">Reset Password</button></a>
+  </p>
 {% else %}
   <p>You are not logged in</p>
-  <a href="{% url 'login' %}">login</a>
+  <p>
+    <a href="{% url 'login' %}"><button type="submit" class="save btn btn-default">Login</button></a>
+    <a href="{% url 'signup' %}"><button type="submit" class="save btn btn-default">Sign Up</button></a>
+  </p>
 {% endif %}
 {% endblock %}

@@ -6,4 +6,5 @@ from . import views
 
 urlpatterns = [
     path('signup/', views.SignUp.as_view(), name='signup'),
+    path('', views.send_email, name='send_email'),
 ]

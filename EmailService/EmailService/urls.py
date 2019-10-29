@@ -7,5 +7,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('SendEmail/', include('SendEmail.urls')),
     path('EmailService/', include('django.contrib.auth.urls')),
-    path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    path('', include('SendEmail.urls')),
+    # path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]
