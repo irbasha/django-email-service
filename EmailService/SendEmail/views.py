@@ -9,7 +9,7 @@ from django.http import Http404
 from django.utils import timezone
 from django.conf import settings
 from .forms import EmailForm
-import csv
+import re
 
 
 class SignUp(generic.CreateView):
@@ -17,39 +17,39 @@ class SignUp(generic.CreateView):
     success_url = reverse_lazy('login')
     template_name = 'signup.html'
 
-
-def validate_recipients_list(email, csv_file):
-    rlist = [email]
-    print(csv_file)
-    file_data = csv_file.read().decode("utf-8")
-    print(file_data)
-    # filedata = open(csv_file)
-    # data = csv.reader(filedata)
-    # for row in data:
-    #     rlist.extend(row)
-    return (list(set(rlist)))
-
+def isValidAddress(address):
+    result = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", address)
+    return True if result else False
 
 def send_email(request):
 	if request.method == "POST":
 		form = EmailForm(request.POST, request.FILES)
 		if form.is_valid():
-			post = form.save(commit=False)
-			post.published_date = timezone.now()
-			post.save()
 			email = request.POST.get('emailto')
 			cc_email = request.POST.get('cc')
 			bcc_email = request.POST.get('bcc')
 			subject = request.POST.get('subject')
 			message = request.POST.get('message')
-			csv_file = request.FILES.get('csv_file')
 			email_from = settings.EMAIL_HOST_USER
-			if not csv_file or not csv_file.name.endswith('.csv'):
-				print(email)
-				recipient_list = [x.strip() for x in email.split(',')]
+
+			csv_file = request.FILES.get('csv_file')
+			if not csv_file.name.endswith('.csv'):
+				print("Error file is not in csv format")
+				recipient_list = [email]
+			elif csv_file.multiple_chunks():
+				print("Uploaded file is too big (%.2f MB)." % (csv_file.size/(1000*1000)))
+				recipient_list = [email]
 			else:
-				recipient_list = validate_recipients_list(email,csv_file)
+				recipient_list = [email]
+				file_data = csv_file.read().decode('utf-8')
+				lines = file_data.split("\n")
+				for line in lines:
+				    fields = line.strip().split(',')
+				    recipient_list.extend(fields)
+				recipient_list = list(set(recipient_list))
+				recipient_list = list(filter(isValidAddress, recipient_list))
 			print(recipient_list)
+
 			email = EmailMessage(subject,message,email_from,recipient_list, bcc=[bcc_email], cc=[cc_email])
 			email.send(fail_silently=False)
 			return render(request, 'success.html')
