@@ -5,6 +5,8 @@
 
 {% block content %}
 {% if user.is_authenticated %}
+  <h1> Compose Email </h1>
+  </br>
   <form method="POST" class="post-form" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
