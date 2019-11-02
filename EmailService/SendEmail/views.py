@@ -68,7 +68,7 @@ def send_email(request):
 				recipient_list = [recipients]
 
 			try:
-				email = EmailMessage(subject,message,email_from,recipient_list, bcc=[bcc_email], cc=[cc_email])
+				email = EmailMessage(subject, message, from_email, recipient_list, bcc=[bcc_list], cc=[cc_list])
 				email.send(fail_silently=False)
 			except SMTPException as err:
 				logger.error('error sending email' + str(err))
